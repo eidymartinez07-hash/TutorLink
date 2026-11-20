@@ -1,4 +1,4 @@
-import os, csv, io, secrets, smtplib
+import os, csv, io, secrets, smtplib, re
 from datetime import datetime, date, timedelta
 from functools import wraps
 from email.message import EmailMessage
@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 load_dotenv()
 app=Flask(__name__)
 app.config.update(SECRET_KEY=os.getenv('SECRET_KEY','DEV_ONLY_CHANGE_ME'), SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL','mysql+pymysql://tutorlink:tutorlink@localhost:3306/tutorlink?charset=utf8mb4'),SQLALCHEMY_TRACK_MODIFICATIONS=False,SESSION_COOKIE_HTTPONLY=True,SESSION_COOKIE_SAMESITE='Lax')
-app.config['SESSION_COOKIE_SECURE']=os.getenv('HTTPS','0')=='1'
+app.config['SESSION_COOKIE_SECURE']=os.getenv('HTTPS','1' if os.getenv('RAILWAY_ENVIRONMENT') else '0')=='1'
 db=SQLAlchemy(app)
 
 class User(db.Model):
@@ -70,6 +70,34 @@ def login():
    session.clear(); session['uid']=u.id; session['csrf']=secrets.token_urlsafe(32); return redirect(url_for('home'))
   flash('Credenciales incorrectas.','error')
  return render_template('login.html')
+@app.route('/register',methods=['GET','POST'])
+def register():
+ if session.get('uid'): return redirect(url_for('home'))
+ if request.method=='POST':
+  name=request.form.get('name','').strip()
+  email=request.form.get('email','').strip().lower()
+  password=request.form.get('password','')
+  confirm=request.form.get('confirm','')
+  if not 2<=len(name)<=140 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+',email) or len(email)>180:
+   flash('Revisa tu nombre y correo electrónico.','error')
+  elif len(password)<10 or password!=confirm:
+   flash('La contraseña debe tener al menos 10 caracteres y coincidir en ambos campos.','error')
+  elif User.query.filter_by(email=email).first():
+   flash('Este correo ya tiene una cuenta. Inicia sesión.','error')
+  else:
+   u=User(name=name,email=email,password=generate_password_hash(password),role='estudiante',active=True)
+   db.session.add(u)
+   try:
+    db.session.commit()
+   except Exception:
+    db.session.rollback()
+    flash('No fue posible registrar la cuenta. Comprueba el correo.','error')
+   else:
+    session.clear(); session['uid']=u.id; session['csrf']=secrets.token_urlsafe(32)
+    flash('Cuenta creada. Coordinación asignará tu tutor académico.')
+    return redirect(url_for('home'))
+ return render_template('register.html')
+
 @app.post('/logout')
 @login_required
 def logout(): session.clear(); return redirect(url_for('login'))
@@ -183,6 +211,16 @@ def create_admin():
  if len(pwd)<10: raise SystemExit('Contraseña demasiado corta')
  if User.query.filter_by(email=email).first(): raise SystemExit('Correo ya existe')
  db.session.add(User(name=name,email=email,password=generate_password_hash(pwd),role='coordinacion')); db.session.commit(); print('Cuenta creada')
+@app.cli.command('reset-password')
+def reset_password():
+ import getpass
+ email=input('Correo de la cuenta: ').strip().lower()
+ u=User.query.filter_by(email=email).first()
+ if not u: raise SystemExit('No existe ese correo')
+ pwd=getpass.getpass('Nueva contraseña (mínimo 10 caracteres): ')
+ if len(pwd)<10: raise SystemExit('Contraseña demasiado corta')
+ u.password=generate_password_hash(pwd); db.session.commit(); print('Contraseña actualizada')
+
 @app.cli.command('send-reminders')
 def send_reminders():
  tomorrow=datetime.utcnow()+timedelta(days=1); end=tomorrow+timedelta(days=1)
