@@ -1,1 +1,46 @@
-{% extends 'base.html' %}{% block content %}<div class="auth-layout"><section class="auth-intro"><span class="eyebrow">BIENVENIDO A TUTORLINK</span><h1>Tu acompañamiento académico, <em>en un solo lugar.</em></h1><p>Consulta tus sesiones, completa actividades y mantén comunicación con tu tutor. Todo desde una plataforma sencilla y accesible.</p><div class="feature-points"><div><span class="feature-icon">✓</span> Seguimiento de tutorías</div><div><span class="feature-icon">✓</span> Cuadernillo digital</div><div><span class="feature-icon">✓</span> Solicitudes y asistencia</div></div></section><section class="card login auth-card"><span class="eyebrow">ACCEDE A TU CUENTA</span><h2>Iniciar sesión</h2><p>Ingresa con tus credenciales para continuar.</p><form method="post"><input type="hidden" name="_csrf" value="{{csrf}}"><label>Correo electrónico<input type="email" name="email" placeholder="nombre@correo.com" required autocomplete="username"></label><label>Contraseña<input type="password" name="password" placeholder="Tu contraseña" required autocomplete="current-password"></label><button class="full-button">Entrar a TutorLink</button></form><p class="auth-switch">¿Aún no tienes cuenta? <a href="{{url_for('register')}}">Regístrate aquí</a></p></section></div>{% endblock %}
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-layout" style="display:flex; justify-content:center;">
+
+    <section class="card login auth-card">
+
+        <h2>Iniciar sesión</h2>
+        <p>Ingresa con tus credenciales para continuar.</p>
+
+        <form method="post">
+            <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+            <label>
+                Correo electrónico
+                <input type="email"
+                       name="email"
+                       placeholder="nombre@correo.com"
+                       required
+                       autocomplete="username">
+            </label>
+
+            <label>
+                Contraseña
+                <input type="password"
+                       name="password"
+                       placeholder="Tu contraseña"
+                       required
+                       autocomplete="current-password">
+            </label>
+
+            <button class="full-button">
+                Iniciar sesión
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            ¿Aún no tienes cuenta?
+            <a href="{{ url_for('register') }}">Regístrate aquí</a>
+        </p>
+
+    </section>
+
+</div>
+{% endblock %}
