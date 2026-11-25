@@ -1,46 +1,98 @@
 
 {% extends 'base.html' %}
-
 {% block content %}
+
 <div class="auth-layout" style="display:flex; justify-content:center;">
+    <section class="card login auth-card" style="width:100%; max-width:480px;">
 
-    <section class="card login auth-card">
-
-        <h2>Iniciar sesión</h2>
-        <p>Ingresa con tus credenciales para continuar.</p>
+        <h2 style="text-align:center;">Iniciar sesión</h2>
+        <p style="text-align:center;">Selecciona tu perfil de acceso</p>
 
         <form method="post">
             <input type="hidden" name="_csrf" value="{{ csrf }}">
 
-            <label>
-                Correo electrónico
-                <input type="email"
-                       name="email"
-                       placeholder="nombre@correo.com"
-                       required
-                       autocomplete="username">
-            </label>
+            <label>Perfil de usuario</label>
+
+            <select name="role" id="role" onchange="cambiarPerfil()" required>
+                <option value="estudiante">Alumno</option>
+                <option value="tutor">Tutor / Docente</option>
+                <option value="coordinacion">Coordinador</option>
+            </select>
+
+            <div id="campoControl">
+                <label>Número de control
+                    <input type="text"
+                           name="numero_control"
+                           id="numero_control"
+                           placeholder="Número de control"
+                           inputmode="numeric"
+                           maxlength="8"
+                           pattern="[0-9]{8}"
+                           required>
+                </label>
+            </div>
+
+            <div id="campoCorreo" style="display:none;">
+                <label>Correo electrónico
+                    <input type="email"
+                           name="email"
+                           id="email"
+                           placeholder="Correo institucional"
+                           disabled>
+                </label>
+            </div>
 
             <label>
-                Contraseña
+                <span id="etiquetaClave">NIP</span>
                 <input type="password"
                        name="password"
-                       placeholder="Tu contraseña"
-                       required
-                       autocomplete="current-password">
+                       id="password"
+                       placeholder="Ingresa tu NIP"
+                       autocomplete="current-password"
+                       required>
             </label>
 
-            <button class="full-button">
+            <button type="submit" class="full-button">
                 Iniciar sesión
             </button>
+
         </form>
 
-        <p class="auth-switch">
+        <p class="auth-switch" id="registro">
             ¿Aún no tienes cuenta?
             <a href="{{ url_for('register') }}">Regístrate aquí</a>
         </p>
 
     </section>
-
 </div>
+
+<script>
+function cambiarPerfil() {
+    const alumno = document.getElementById("role").value === "estudiante";
+
+    document.getElementById("campoControl").style.display =
+        alumno ? "block" : "none";
+
+    document.getElementById("campoCorreo").style.display =
+        alumno ? "none" : "block";
+
+    document.getElementById("numero_control").required = alumno;
+    document.getElementById("numero_control").disabled = !alumno;
+
+    document.getElementById("email").required = !alumno;
+    document.getElementById("email").disabled = alumno;
+
+    document.getElementById("etiquetaClave").textContent =
+        alumno ? "NIP" : "Contraseña";
+
+    document.getElementById("password").placeholder =
+        alumno ? "Ingresa tu NIP" : "Ingresa tu contraseña";
+
+    document.getElementById("registro").style.display =
+        alumno ? "block" : "none";
+}
+
+cambiarPerfil();
+</script>
+
 {% endblock %}
