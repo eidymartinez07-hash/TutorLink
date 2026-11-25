@@ -1,1 +1,70 @@
-{% extends 'base.html' %}{% block content %}<div class="auth-layout"><section class="auth-intro"><span class="eyebrow">ÚNETE A TUTORLINK</span><h1>Comienza tu camino con <em>acompañamiento académico.</em></h1><p>Crea tu cuenta de estudiante para consultar sesiones, realizar actividades y solicitar apoyo. Coordinación te asignará un tutor.</p><div class="feature-points"><div><span class="feature-icon">✓</span> Registro gratuito</div><div><span class="feature-icon">✓</span> Acceso desde celular o computadora</div><div><span class="feature-icon">✓</span> Actividades y seguimiento en línea</div></div></section><section class="card login auth-card"><span class="eyebrow">REGISTRO DE ESTUDIANTE</span><h2>Crear cuenta</h2><p>Completa tus datos para empezar.</p><form method="post"><input type="hidden" name="_csrf" value="{{csrf}}"><label>Nombre completo<input name="name" maxlength="140" placeholder="Tu nombre completo" required autocomplete="name"></label><label>Correo electrónico<input type="email" name="email" maxlength="180" placeholder="nombre@correo.com" required autocomplete="email"></label><label>Contraseña (mínimo 10 caracteres)<input type="password" name="password" minlength="10" required autocomplete="new-password"></label><label>Confirmar contraseña<input type="password" name="confirm" minlength="10" required autocomplete="new-password"></label><button class="full-button">Crear mi cuenta</button></form><p class="auth-switch">¿Ya tienes cuenta? <a href="{{url_for('login')}}">Inicia sesión</a></p></section></div>{% endblock %}
+
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="auth-layout" style="display:flex; justify-content:center;">
+    <section class="card login auth-card" style="width:100%; max-width:480px;">
+
+        <h2 style="text-align:center;">Registro de alumnos</h2>
+        <p style="text-align:center;">
+            Completa tus datos para acceder al sistema de tutorías.
+        </p>
+
+        <form method="post">
+            <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+            <label>Nombre completo
+                <input type="text" name="name"
+                       placeholder="Nombre y apellidos"
+                       maxlength="140" required>
+            </label>
+
+            <label>Número de control
+                <input type="text" name="numero_control"
+                       placeholder="Número de control"
+                       inputmode="numeric"
+                       pattern="[0-9]{8}"
+                       maxlength="8" required>
+            </label>
+
+            <label>Correo electrónico
+                <input type="email" name="email"
+                       placeholder="Correo electrónico"
+                       maxlength="180" required>
+            </label>
+
+            <label>NIP
+                <input type="password" name="password"
+                       placeholder="Crea tu NIP"
+                       inputmode="numeric"
+                       pattern="[0-9]{8,12}"
+                       minlength="8" maxlength="12"
+                       autocomplete="new-password" required>
+            </label>
+
+            <small>El NIP debe contener de 8 a 12 dígitos.</small>
+
+            <label>Confirmar NIP
+                <input type="password" name="confirm"
+                       placeholder="Repite tu NIP"
+                       inputmode="numeric"
+                       pattern="[0-9]{8,12}"
+                       minlength="8" maxlength="12"
+                       autocomplete="new-password" required>
+            </label>
+
+            <button type="submit" class="full-button">
+                Registrarme
+            </button>
+
+        </form>
+
+        <p class="auth-switch">
+            ¿Ya tienes cuenta?
+            <a href="{{ url_for('login') }}">Iniciar sesión</a>
+        </p>
+
+    </section>
+</div>
+
+{% endblock %}
