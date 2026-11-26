@@ -1,1 +1,19 @@
-{% extends 'base.html' %}{% block content %}<section class="card"><h1>{{a.title}}</h1><p>{{a.prompt}}</p><p>Fecha límite: {{a.due or 'Sin fecha'}}</p><form method="post"><input type="hidden" name="_csrf" value="{{csrf}}"><label>Mi respuesta<textarea name="answer" rows="10" maxlength="15000" required>{{sub.answer if sub else ''}}</textarea></label><button>Guardar y entregar</button></form>{% if sub and sub.feedback %}<h3>Observaciones del tutor</h3><p>{{sub.feedback}}</p>{% endif %}</section>{% endblock %}
+{% extends 'base.html' %}{% block content %}
+<a class="back-link" href="{{ url_for('home') }}">← Volver a mi panel</a>
+<section class="card">
+<h1>{{a.title}}</h1>
+<p>{{a.prompt}}</p>
+<p>Fecha límite: {{a.due or 'Sin fecha'}}</p>
+<form method="post">
+<input type="hidden" name="_csrf" value="{{csrf}}">
+<label>Mi respuesta<textarea name="answer" rows="10" maxlength="15000" required>{{sub.answer if sub else ''}}</textarea>
+</label>
+<button>Guardar y entregar</button>
+</form>
+{% if sub and sub.feedback %}
+<h3>Observaciones del tutor</h3>
+<p>{{sub.feedback}}</p>
+{% endif %}
+</section>
+{% endblock %}
+

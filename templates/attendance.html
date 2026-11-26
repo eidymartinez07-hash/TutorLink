@@ -1,1 +1,18 @@
-{% extends 'base.html' %}{% block content %}<section class="card"><h1>Asistencia: {{s.title}}</h1><p>{{s.starts.strftime('%d/%m/%Y %H:%M')}}</p><form method="post"><input type="hidden" name="_csrf" value="{{csrf}}">{% for u in studs %}<label class="check"><input type="checkbox" name="present" value="{{u.id}}" {% if records.get(u.id) %}checked{% endif %}> {{u.name}}</label>{% endfor %}<button>Guardar asistencia</button></form></section>{% endblock %}
+{% extends 'base.html' %}{% block content %}
+<a class="back-link" href="{{ url_for('home') }}">← Volver a mi panel</a>
+<section class="card">
+<h1>Asistencia: {{s.title}}</h1>
+<p>{{s.starts.strftime('%d/%m/%Y %H:%M')}}</p>
+<form method="post">
+<input type="hidden" name="_csrf" value="{{csrf}}">
+{% for u in studs %}
+<label class="check">
+<input type="checkbox" name="present" value="{{u.id}}" {% if records.get(u.id) %}checked{% endif %}> {{u.name}}</label>
+{% else %}
+<p>No hay estudiantes asignados.</p>
+{% endfor %}
+<button>Guardar asistencia</button>
+</form>
+</section>
+{% endblock %}
+
