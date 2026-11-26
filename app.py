@@ -12,6 +12,8 @@ load_dotenv()
 app=Flask(__name__)
 app.config.update(SECRET_KEY=os.getenv('SECRET_KEY','DEV_ONLY_CHANGE_ME'), SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL','mysql+pymysql://tutorlink:tutorlink@localhost:3306/tutorlink?charset=utf8mb4'),SQLALCHEMY_TRACK_MODIFICATIONS=False,SESSION_COOKIE_HTTPONLY=True,SESSION_COOKIE_SAMESITE='Lax')
 app.config['SESSION_COOKIE_SECURE']=os.getenv('HTTPS','1' if os.getenv('RAILWAY_ENVIRONMENT') else '0')=='1'
+if os.getenv('RAILWAY_ENVIRONMENT') and (not os.getenv('SECRET_KEY') or not os.getenv('DATABASE_URL')):
+ raise RuntimeError('Configura SECRET_KEY y DATABASE_URL en Railway.')
 db=SQLAlchemy(app)
 
 class User(db.Model):
@@ -248,6 +250,19 @@ def reset_password():
  pwd=getpass.getpass('Nueva contraseña (mínimo 10 caracteres): ')
  if len(pwd)<10: raise SystemExit('Contraseña demasiado corta')
  u.password=generate_password_hash(pwd); db.session.commit(); print('Contraseña actualizada')
+
+@app.cli.command('create-demo')
+def create_demo():
+ import getpass
+ accounts=[('docente@example.com','Docente de demostración','tutor'),('coordinador@example.com','Coordinación de demostración','coordinacion')]
+ for email,name,role in accounts:
+  if User.query.filter_by(email=email).first():
+   print(f'{email}: ya existe; no se modifica.'); continue
+  pwd=getpass.getpass(f'Contraseña de {email} (mínimo 10 caracteres): ')
+  if len(pwd)<10:
+   db.session.rollback(); raise SystemExit('Contraseña demasiado corta')
+  db.session.add(User(name=name,email=email,password=generate_password_hash(pwd),role=role,active=True))
+ db.session.commit(); print('Cuentas de demostración preparadas.')
 
 @app.cli.command('send-reminders')
 def send_reminders():

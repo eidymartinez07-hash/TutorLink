@@ -48,3 +48,8 @@ La orden `flask --app app send-reminders` registra notificaciones internas para 
 - Es una versión funcional de desarrollo, **no un despliegue institucional auditado**. Antes de usar datos reales: habilitar HTTPS, servidor WSGI de producción, copias de seguridad cifradas, restablecimiento de contraseñas, políticas de retención, consentimiento y revisión institucional de privacidad y permisos. No guardes datos sensibles de salud en solicitudes.
 - No incluye integración con Teams/Microsoft 365 ni un sistema de canalización con acceso independiente para departamentos externos.
 - El archivo `.env` contiene secretos: no lo subas a repositorios públicos.
+
+## Publicación y demostración
+Consultar [GUIA_PUBLICACION.md](GUIA_PUBLICACION.md) y [ACCESOS_DEMO.md](ACCESOS_DEMO.md). Los accesos de ejemplo no se muestran en la interfaz. No usar contraseñas públicas con datos reales.
+
+El registro de estudiantes usa número de control de ocho dígitos y NIP de ocho a doce dígitos. Tutor y Coordinación usan correo y contraseña. El enlace de exportación CSV se muestra en Coordinación; el backend también permite al tutor exportar sus propias asistencias. No hay envío automático semanal o mensual de reportes en esta versión.
