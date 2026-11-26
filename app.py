@@ -134,11 +134,25 @@ def home():
 @app.post('/users/create')
 @roles('coordinacion')
 def create_user():
- role=request.form.get('role'); email=request.form.get('email','').strip().lower(); password=request.form.get('password','')
- if role not in ('estudiante','tutor','coordinacion') or len(password)<10 or not email or User.query.filter_by(email=email).first(): flash('Revisa rol, correo y contraseña (mínimo 10 caracteres).','error'); return redirect(url_for('home'))
- tutor_id=int(request.form['tutor_id']) if role=='estudiante' and request.form.get('tutor_id') else None
- if tutor_id and not User.query.filter_by(id=tutor_id,role='tutor').first(): abort(400)
- db.session.add(User(name=request.form['name'].strip(),email=email,numero_control=numero_control,password=generate_password_hash(password),role=role,career=request.form.get('career',''),semester=int(request.form['semester']) if request.form.get('semester') else None,tutor_id=tutor_id)); db.session.commit(); flash('Cuenta creada.'); return redirect(url_for('home'))
+ role=request.form.get('role'); email=request.form.get('email','').strip().lower(); password=request.form.get('password',''); name=request.form.get('name','').strip()
+ numero_control=request.form.get('numero_control','').strip() if role=='estudiante' else None
+ valid_password=bool(re.fullmatch(r'[0-9]{8,12}',password)) if role=='estudiante' else len(password)>=10
+ if role not in ('estudiante','tutor','coordinacion') or not valid_password or not 2<=len(name)<=140 or len(email)>180 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+',email) or User.query.filter_by(email=email).first():
+  flash('Revisa nombre, rol, correo y contraseña.','error'); return redirect(url_for('home'))
+ if role=='estudiante' and (not re.fullmatch(r'[0-9]{8}',numero_control) or User.query.filter_by(numero_control=numero_control).first()):
+  flash('Número de control inválido o duplicado.','error'); return redirect(url_for('home'))
+ try:
+  tutor_id=int(request.form['tutor_id']) if role=='estudiante' and request.form.get('tutor_id') else None
+  semester=int(request.form['semester']) if role=='estudiante' and request.form.get('semester') else None
+  if semester is not None and not 1<=semester<=15: raise ValueError()
+ except ValueError:
+  flash('Revisa semestre y tutor.','error'); return redirect(url_for('home'))
+ if tutor_id and not User.query.filter_by(id=tutor_id,role='tutor',active=True).first(): abort(400)
+ try:
+  db.session.add(User(name=name,email=email,numero_control=numero_control,password=generate_password_hash(password),role=role,career=request.form.get('career','')[:100] if role=='estudiante' else '',semester=semester,tutor_id=tutor_id)); db.session.commit()
+ except Exception:
+  db.session.rollback(); app.logger.exception('Error al crear cuenta'); flash('No se pudo crear la cuenta.','error'); return redirect(url_for('home'))
+ flash('Cuenta creada.'); return redirect(url_for('home'))
 @app.post('/users/<int:uid>/assign')
 @roles('coordinacion')
 def assign(uid):
